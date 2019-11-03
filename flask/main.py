@@ -14,8 +14,13 @@ from sumy.utils import get_stop_words
 import numpy as np
 import networkx as nx
 
-import spacy
-nlp = spacy.load('en_core_web_sm')
+import pandas as pd
+
+from selenium import webdriver
+import time
+
+# import spacy
+# nlp = spacy.load('en_core_web_sm')
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -38,12 +43,13 @@ def home():
 @app.route('/act', methods=['POST'])
 def act():
   projectpath = request.form['url']
-  return render_template("home.html", url=projectpath, headline=scrape_headline(projectpath), summary = summarize(projectpath, 5))
+  return render_template("home.html", url=projectpath, headline=scrape_headline(projectpath), summary = summarize(projectpath, 5), status = fakeNews(projectpath))
 
 @app.route("/feed")
 def feed():
   headlines = list()
   summaries = list()
+  statuses = list()
   # urls = list()
   # urls.append("https://www.cnn.com/2019/11/02/sport/breeders-cup-horse-racing-winning-post-saturday-spt-intl/index.html")
   # urls.append("https://www.nytimes.com/interactive/2019/11/02/us/politics/trump-twitter-presidency.html?action=click&module=Top%20Stories&pgtype=Homepage")
@@ -54,8 +60,9 @@ def feed():
   for i in range(0, len(urls)):
     headlines.append(scrape_headline(urls[i]))
     summaries.append(summarize(urls[i], 5))
+    statuses.append(fakeNews(urls[i]))
   # return render_template("feed.html", headlines=headlines, summaries=summaries, urls=urls)
-  return render_template("feed.html", headlines=headlines, summaries=summaries, urls=urls)
+  return render_template("feed.html", headlines=headlines, summaries=summaries, urls=urls, statuses=statuses)
 
 @app.route("/about")
 def about():
@@ -97,9 +104,36 @@ def summarize(url, number):
   summarizer.stop_words = get_stop_words("english")
   return " ".join(str(i) for i in summarizer(parser.document, number))
 
-def clickbait(url):
-  return ""
+def fakeNews(url):
+  if url.__contains__("https://"):
+    url = url[8:-1]
+  if url.__contains__("http://"):
+    url = url[7:-1]
+   #chrome_options = webdriver.ChromeOptions()
   
+  # chrome_options.experimental_options
+  browser = webdriver.Chrome("static/chromedriver.exe")
+  # browser.set_window_position(-10000, 0)
+  # browser.set_window_size(0, 0)
+
+  browser.get("http://www.fakenewsai.com")
+  element = browser.find_element_by_id("url")
+  element.send_keys(url)
+  button = browser.find_element_by_id("submit")
+  button.click()
+
+  time.sleep(1)
+  site = ""+browser.page_source
+  result = ""
+
+  if(site[site.index("opacity: 1")-10] == "e"):
+      result = "Fake News"
+  else:
+      result = "Real News"
+  browser.quit()
+  return result
+    
+
 if __name__ == "__main__":
   app.jinja_env.cache = {}
-  app.run(debug=True)
+  app.run(debug=True, threaded=True)

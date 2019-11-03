@@ -285,7 +285,7 @@ def print_list(l):
         print(o)
     print()
 
-url = "https://entertainment.theonion.com/sesame-street-introduces-paranoid-schizophrenic-muppe-1839536207" #THIS IS WHAT YOU CHANGE
+url = "https://www.foxnews.com/us/maryland-driver-gets-probation-for-delaware-crash-that-killed-5-nj-family-members" #THIS IS WHAT YOU CHANGE
 
 page = urllib.request.urlopen(url)
     
@@ -354,11 +354,6 @@ d = soup(requests.get('https://www.cnn.com/2019/11/02/world/greta-thunberg-leona
 from bs4 import BeautifulSoup
 import urllib.request
 
-def print_list2(l):
-    for o in l:
-        print(o)
-    print()
-
 url2 = "https://www.foxnews.com/us/texas-deputies-missing-new-hampshire-couple-murdered-rv-stolen"
 
 
@@ -368,8 +363,8 @@ soup2 = BeautifulSoup(page2, 'html.parser')
 
 headlines2 = soup2.find_all('h1')
 articles2 = soup2.find_all('p')
-print_list2(headlines2)
-print_list2(articles2)
+print_list(headlines2)
+print_list(articles2)
 
 trump_headlines2 = []
 article_list2 = []
@@ -381,7 +376,7 @@ print(headlinetitle2)
 
 for article2 in articles2:
   article_list2.append(article2.getText())
-print_list2(article_list2)
+print_list(article_list2)
 
 for article2 in article_list2:
   completearticle2 += str(article2 + " ")

@@ -17,11 +17,25 @@
     {% extends "template.html" %}
     {% block content %}
 
-    <div class="container-fluid">
-        <br><br><br>
-        <h1>Contact</h1>
-    </div>
-
+	<br><br><br>
+	<h1>Contact</h1>
+	<br>
+	<form id="gform" method="POST" action="https://script.google.com/macros/s/AKfycbyeiuQNivchbC7hBe88mPNGhkyo2sH-GTn9lOTloeAiK8Dig-4W/exec">
+        <div class="form-group">
+            <label for="[1] Name">Name</label>
+            <input required type="text" id="[1] Name" name="[1] Name" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+            <label for="[2] Email">Email</label>
+            <input required type="email" id="[2] Email" name="[2] Email" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+            <label for="[3] Message">Message</label>
+            <textarea required type="text" id="[3] Message" name="[3] Message" class="form-control" placeholder=""></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+	</form>
+	
     {% endblock %}
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
