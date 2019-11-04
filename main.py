@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
 
-import nltk
-nltk.download("punkt")
+# import nltk
+# nltk.download("punkt")
 
 from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
@@ -12,15 +12,12 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
 import numpy as np
-import networkx as nx
+# import networkx as nx
 
-import pandas as pd
+# import pandas as pd
 
 from selenium import webdriver
 import time
-
-# import spacy
-# nlp = spacy.load('en_core_web_sm')
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -31,19 +28,19 @@ import urllib.request
 from flask import Flask, request, render_template
 import time
 
-app = Flask(__name__)
+from waitress import serve
 
+app = Flask(__name__)
 
 @app.route("/")
 @app.route("/home")
 def home():
   return render_template("home.html")
-  
 
 @app.route('/act', methods=['POST'])
 def act():
   projectpath = request.form['url']
-  return render_template("home.html", url=projectpath, headline=scrape_headline(projectpath), summary = summarize(projectpath, 5), status = fakeNews(projectpath))
+  return render_template("home.html", url=projectpath, headline=scrape_headline(projectpath), summary = summarize(projectpath), status = fakeNews(projectpath))
 
 @app.route("/feed")
 def feed():
@@ -59,10 +56,9 @@ def feed():
   urls = scrape_google("https://news.google.com/news/rss")
   for i in range(0, len(urls)):
     headlines.append(scrape_headline(urls[i]))
-    summaries.append(summarize(urls[i], 5))
+    summaries.append(summarize(urls[i]))
     statuses.append(fakeNews(urls[i]))
-  # return render_template("feed.html", headlines=headlines, summaries=summaries, urls=urls)
-  return render_template("feed.html", headlines=headlines, summaries=summaries, urls=urls, statuses=statuses)
+  return render_template("feed.html", urls = urls, headlines=headlines, summaries=summaries, statuses=statuses)
 
 @app.route("/about")
 def about():
@@ -97,7 +93,7 @@ def scrape_google(url):
     links.append(news.link.text)
   return links[0:20]
 
-def summarize(url, number):
+def summarize(url, number = 5):
   parser = HtmlParser.from_url(url, Tokenizer("english"))
   stemmer = Stemmer("english")
   summarizer = Summarizer(stemmer)
@@ -109,31 +105,23 @@ def fakeNews(url):
     url = url[8:-1]
   if url.__contains__("http://"):
     url = url[7:-1]
-   #chrome_options = webdriver.ChromeOptions()
-  
-  # chrome_options.experimental_options
   browser = webdriver.Chrome("static/chromedriver.exe")
-  # browser.set_window_position(-10000, 0)
-  # browser.set_window_size(0, 0)
-
   browser.get("http://www.fakenewsai.com")
   element = browser.find_element_by_id("url")
   element.send_keys(url)
   button = browser.find_element_by_id("submit")
   button.click()
-
   time.sleep(1)
-  site = ""+browser.page_source
+  site = "" + browser.page_source
   result = ""
-
   if(site[site.index("opacity: 1")-10] == "e"):
-      result = "Fake News"
+    result = "Fake News"
   else:
-      result = "Real News"
+    result = "Real News"
   browser.quit()
   return result
-    
 
 if __name__ == "__main__":
-  app.jinja_env.cache = {}
-  app.run(debug=True, threaded=True)
+  # app.jinja_env.cache = {}
+  # app.run(debug=True, threaded=True)
+  serve(app, host = '0.0.0.0', port = 8080)
