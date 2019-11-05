@@ -1,9 +1,6 @@
 from __future__ import absolute_import
 from __future__ import division, print_function, unicode_literals
 
-# import nltk
-# nltk.download("punkt")
-
 from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
@@ -12,18 +9,12 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
 import numpy as np
-# import networkx as nx
-
-# import pandas as pd
-
-from selenium import webdriver
-import time
-
-import warnings
-warnings.filterwarnings('ignore')
 
 from bs4 import BeautifulSoup
 import urllib.request
+
+import json
+import requests
 
 from flask import Flask, request, render_template
 import time
@@ -47,12 +38,6 @@ def feed():
   headlines = list()
   summaries = list()
   statuses = list()
-  # urls = list()
-  # urls.append("https://www.cnn.com/2019/11/02/sport/breeders-cup-horse-racing-winning-post-saturday-spt-intl/index.html")
-  # urls.append("https://www.nytimes.com/interactive/2019/11/02/us/politics/trump-twitter-presidency.html?action=click&module=Top%20Stories&pgtype=Homepage")
-  # urls.append("https://www.nytimes.com/2019/11/02/sports/trump-ufc-244-nyc.html?action=click&module=Top%20Stories&pgtype=Homepage")
-  # urls.append("https://www.cnn.com/2019/11/02/americas/niagara-falls-weather-iron-scow-trnd/index.html")
-  # urls.append("https://www.nytimes.com/interactive/2019/11/02/us/politics/trump-twitter-disinformation.html")
   urls = scrape_google("https://news.google.com/news/rss")
   for i in range(0, len(urls)):
     headlines.append(scrape_headline(urls[i]))
@@ -101,27 +86,22 @@ def summarize(url, number = 5):
   return " ".join(str(i) for i in summarizer(parser.document, number))
 
 def fakeNews(url):
-  if url.__contains__("https://"):
-    url = url[8:-1]
-  if url.__contains__("http://"):
-    url = url[7:-1]
-  browser = webdriver.Chrome("static/chromedriver.exe")
-  browser.get("http://www.fakenewsai.com")
-  element = browser.find_element_by_id("url")
-  element.send_keys(url)
-  button = browser.find_element_by_id("submit")
-  button.click()
-  time.sleep(1)
-  site = "" + browser.page_source
-  result = ""
-  if(site[site.index("opacity: 1")-10] == "e"):
-    result = "Fake News"
+  site = 'https://us-central1-fake-news-ai.cloudfunctions.net/detect/'
+  payload = {'url': url}
+  headers = {'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate, br', 'Accept-Language': 'en-US,en;q=0.5',
+              'Connection': 'keep-alive', 'Content-Length': '103', 'Content-type': 'application/json; charset=utf-8',
+              'DNT': '1', 'Host': 'us-central1-fake-news-ai.cloudfunctions.net', 'Origin': 'http://www.fakenewsai.com',
+              'Referer': 'http://www.fakenewsai.com/', 'TE': 'Trailers',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0'}
+  response_json = requests.post(site, data=json.dumps(payload), headers=headers).text
+  response = json.loads(response_json)
+  is_fake = int(response['fake'])
+  if is_fake == 0:
+    return 'Real'
+  elif is_fake == 1:
+    return 'Fake'
   else:
-    result = "Real News"
-  browser.quit()
-  return result
+    return 'N/A'
 
 if __name__ == "__main__":
-  # app.jinja_env.cache = {}
-  # app.run(debug=True, threaded=True)
   serve(app, host = '0.0.0.0', port = 8080)
