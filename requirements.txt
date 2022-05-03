@@ -42,7 +42,7 @@ six==1.12.0
 soupsieve==1.9.5
 sumy==0.8.1
 Twisted==22.2.0
-urllib3==1.25.6
+urllib3==1.26.5
 w3lib==1.21.0
 waitress==1.4.3
 webencodings==0.5.1
