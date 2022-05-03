@@ -23,7 +23,7 @@ lxml==4.6.5
 MarkupSafe==1.1.1
 mechanize==0.4.3
 nltk==3.6.6
-numpy==1.17.3
+numpy==1.21.0
 parsel==1.5.2
 Protego==0.1.15
 pyasn1==0.4.7
